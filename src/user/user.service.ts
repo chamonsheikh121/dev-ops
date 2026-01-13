@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
 /* eslint-disable @typescript-eslint/no-unsafe-return */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
-/* eslint-disable prettier/prettier */
+
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { PrismaService } from 'src/common/prisma/prisma.service';
 
