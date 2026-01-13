@@ -11,17 +11,17 @@ jobs:
 
         steps:
             - name: Checkout Repository
-            - uses: actions/checkout@v3
+              uses: actions/checkout@v3
             
             - name: setup Nodejs
-            - ueses: actions/setup-node@v3
+              uses: actions/setup-node@v3
               with:
                   node-version: '18'
             - name: Install Dependencies
               run: npm install
             
             - name: Run Tests
-              run : npm run ci:fix
+              run: npm run ci:fix
 
             - name: Build APPLICATION
-              run : npm run build
+              run: npm run build
