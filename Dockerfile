@@ -48,7 +48,7 @@ RUN DATABASE_URL="postgresql://dummy:dummy@localhost:5432/dummy" pnpx prisma gen
 COPY --from=builder /app/dist ./dist
 
 # Expose application port
-EXPOSE 3000
+EXPOSE 5000
 
 # Start application
 CMD ["node", "dist/src/main"]
