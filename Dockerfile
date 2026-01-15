@@ -16,8 +16,8 @@ RUN pnpm install --frozen-lockfile
 # Copy prisma schema and config
 COPY prisma ./prisma
 
-# Generate Prisma Client
-RUN pnpx prisma generate
+# Generate Prisma Client (set dummy DATABASE_URL for config loading)
+RUN DATABASE_URL="postgresql://dummy:dummy@localhost:5432/dummy" pnpx prisma generate
 
 # Copy source code
 COPY . .
@@ -42,7 +42,7 @@ RUN pnpm install --prod --frozen-lockfile
 
 # Copy prisma schema and generate client
 COPY prisma ./prisma
-RUN pnpx prisma generate
+RUN DATABASE_URL="postgresql://dummy:dummy@localhost:5432/dummy" pnpx prisma generate
 
 # Copy built application from builder
 COPY --from=builder /app/dist ./dist
