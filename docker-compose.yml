@@ -1,4 +1,20 @@
 services:
+
+  app:
+    image: social_app:latest
+    container_name: social_app
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: always
+    env_file:
+      - .env
+    ports:
+      - "4000:4000"
+    depends_on:
+      - postgres
+      - redis
+
   postgres:
     image: postgres:15
     container_name: postgres_db
