@@ -126,4 +126,3 @@ Click the **“Use this template”** button to create a new project instantly.
 ## 📄 License
 
 This project is open-source and free to use.# socialApp
-# dev-ops
