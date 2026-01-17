@@ -90,6 +90,22 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
+      - name: Telegram notify on deploy success
+        if: success()
+        uses: appleboy/telegram-action@master
+        with:
+          token: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          to: ${{ secrets.TELEGRAM_CHAT_ID }}
+          format: markdown
+          message: |
+            ✅ *DEPLOY SUCCESS*
+
+            *Repo:* `${{ github.repository }}`
+            *Branch:* `${{ github.ref_name }}`
+            *Image:* `${{ secrets.DOCKER_USERNAME }}/${{ env.IMAGE_NAME }}:latest`
+
+            🚀 Docker image pushed successfully
+
       - name: Send Telegram notification on failure
         if: failure()
         uses: appleboy/telegram-action@master
