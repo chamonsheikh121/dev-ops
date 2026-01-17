@@ -2,8 +2,10 @@ name: CI/CD Pipeline
 
 on:
   push:
+    branches: [main]
+  pull_request:
     branches:
-      - '**'  # Run on push to any branch
+      - '**'
 
 jobs:
   test-and-build:
