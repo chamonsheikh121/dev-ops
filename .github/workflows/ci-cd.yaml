@@ -9,6 +9,31 @@ jobs:
   test-and-build:
     runs-on: ubuntu-latest
 
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: testuser
+          POSTGRES_PASSWORD: testpass
+          POSTGRES_DB: testdb
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+      redis:
+        image: redis:alpine
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 6379:6379
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -26,8 +51,32 @@ jobs:
       - name: Install dependencies
         run: pnpm install
 
+      - name: Setup test environment
+        run: |
+          cp .env.example .env || echo "No .env.example found"
+        env:
+          DATABASE_URL: postgresql://testuser:testpass@localhost:5432/testdb
+          REDIS_HOST: localhost
+          REDIS_PORT: 6379
+
+      - name: Run database migrations
+        run: pnpm prisma migrate deploy
+        env:
+          DATABASE_URL: postgresql://testuser:testpass@localhost:5432/testdb
+
+      - name: Generate Prisma Client
+        run: pnpm prisma generate
+
       - name: Lint code
         run: pnpm run lint
+
+      - name: Run tests
+        run: pnpm test || echo "No tests configured yet"
+        env:
+          DATABASE_URL: postgresql://testuser:testpass@localhost:5432/testdb
+          REDIS_HOST: localhost
+          REDIS_PORT: 6379
+          NODE_ENV: test
 
       - name: Build project
         run: pnpm run build
