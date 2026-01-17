@@ -11,7 +11,7 @@ COPY package.json pnpm-lock.yaml ./
 COPY prisma.config.ts ./
 
 # Install dependencies
-RUN pnpm install --frozen-lockfile
+RUN pnpm install 
 
 # Copy prisma schema and config
 COPY prisma ./prisma
@@ -38,7 +38,7 @@ COPY package.json pnpm-lock.yaml ./
 COPY prisma.config.ts ./
 
 # Install production dependencies only
-RUN pnpm install --prod --frozen-lockfile
+RUN pnpm install --prod 
 
 # Copy prisma schema and generate client
 COPY prisma ./prisma

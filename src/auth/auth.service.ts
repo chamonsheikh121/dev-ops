@@ -1,7 +1,8 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { Inject, Injectable } from '@nestjs/common';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import { Cache } from 'cache-manager';
 import { PrismaService } from '../common/prisma/prisma.service';
-import { RedisService } from '../common/redis/redis.service';
 import { CreateUserDtos } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import bcrypt from 'bcryptjs';
@@ -28,7 +29,7 @@ export class AuthService {
 
   constructor(
     private readonly prisma: PrismaService,
-    private readonly redis: RedisService,
+    @Inject(CACHE_MANAGER) private readonly cacheManager: Cache,
     private readonly configService: ConfigService,
     private readonly metricsService: MetricsService,
     @Inject('ACCESS_JWT') private readonly accessTokenService: JwtService,
@@ -115,7 +116,7 @@ export class AuthService {
       const otp = Math.floor(100000 + Math.random() * 900000).toString();
 
       // Store OTP in Redis with 10 minutes TTL
-      await this.redis.set(`otp:${user.email}`, otp, 600);
+      await this.cacheManager.set(`otp:${user.email}`, otp, 600000);
 
       this.logger.debug({ email: user.email }, 'OTP stored in Redis');
 
@@ -146,7 +147,7 @@ export class AuthService {
   async verifyOtp(email: string, otp: string) {
     this.logger.info({ email }, 'Verifying OTP');
 
-    const storedOtp = await this.redis.get(`otp:${email}`);
+    const storedOtp = await this.cacheManager.get<string>(`otp:${email}`);
     if (!storedOtp || storedOtp !== otp) {
       this.logger.warn({ email, providedOtp: otp }, 'OTP verification failed');
       throw new BadRequestError('Invalid or expired OTP');
@@ -185,7 +186,7 @@ export class AuthService {
       });
 
     // Delete OTP from Redis
-    await this.redis.del(`otp:${email}`);
+    await this.cacheManager.del(`otp:${email}`);
 
     const payload: jwtPayloadDto = {
       userId: user.id,
@@ -240,16 +241,16 @@ export class AuthService {
     if (!user.isVerified) {
       this.logger.warn({ email: user.email }, 'User not verified');
       // Delete OTP from Redis if it exists
-      const exists = await this.redis.get(`otp:${user.email}`);
+      const exists = await this.cacheManager.get(`otp:${user.email}`);
 
       if (exists) {
         this.logger.info({ email: loginData.email }, 'removing old otp');
-        await this.redis.del(`otp:${user.email}`);
+        await this.cacheManager.del(`otp:${user.email}`);
       }
 
       const otp = Math.floor(100000 + Math.random() * 900000).toString();
       // Store OTP in Redis with 10 minutes TTL
-      await this.redis.set(`otp:${user.email}`, otp, 600);
+      await this.cacheManager.set(`otp:${user.email}`, otp, 600000);
 
       this.logger.debug({ email: user.email }, 'OTP stored in Redis');
 
@@ -335,7 +336,7 @@ export class AuthService {
     const resetToken = this.generateResetToken(payload);
 
     // Store reset token in Redis with 5min TTL
-    await this.redis.set(`reset:${resetToken}`, user.email, 300);
+    await this.cacheManager.set(`reset:${resetToken}`, user.email, 300000);
 
     this.logger.debug({ email }, 'Reset token stored in Redis');
 
@@ -358,7 +359,7 @@ export class AuthService {
     this.logger.info('Password reset attempt');
 
     // Get email from Redis
-    const email = await this.redis.get(`reset:${token}`);
+    const email = await this.cacheManager.get<string>(`reset:${token}`);
     if (!email) {
       this.logger.warn({ token }, 'Invalid or expired reset token');
       throw new BadRequestError('Invalid or expired reset token');
@@ -384,7 +385,7 @@ export class AuthService {
     });
 
     // Delete reset token from Redis
-    await this.redis.del(`reset:${token}`);
+    await this.cacheManager.del(`reset:${token}`);
 
     this.logger.info({ email }, 'Password reset successfully');
 
