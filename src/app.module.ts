@@ -48,7 +48,7 @@ import { PageFollowerModule } from './pageFollower/page-follower.module';
             {
               target: 'pino-loki',
               options: {
-                host: '192.168.0.121:3100',
+                host: 'http://192.168.0.103:3100',
                 batching: true,
                 interval: 5,
                 labels: {

@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
 /* eslint-disable @typescript-eslint/no-unsafe-return */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
-/* eslint-disable prettier/prettier */
+
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { PrismaService } from 'src/common/prisma/prisma.service';
 
@@ -56,16 +56,17 @@ export class UserService {
     }
 
     // Filter out empty/undefined/null fields from updateData
-    const filteredUpdateData = updateData && typeof updateData === 'object'
-      ? Object.keys(updateData).reduce((acc, key) => {
-          const value = updateData[key];
-          // Only include fields that are not empty strings, undefined, or null
-          if (value !== '' && value !== undefined && value !== null) {
-            acc[key] = value;
-          }
-          return acc;
-        }, {} as any)
-      : {};
+    const filteredUpdateData =
+      updateData && typeof updateData === 'object'
+        ? Object.keys(updateData).reduce((acc, key) => {
+            const value = updateData[key];
+            // Only include fields that are not empty strings, undefined, or null
+            if (value !== '' && value !== undefined && value !== null) {
+              acc[key] = value;
+            }
+            return acc;
+          }, {} as any)
+        : {};
 
     // Prepare update data - only include fields that have values
     const updatePayload = {
