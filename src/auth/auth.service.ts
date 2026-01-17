@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { Inject, Injectable } from '@nestjs/common';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
-import { Cache } from 'ruhul-janoar';
+import { Cache } from 'cache-manager';
 import { PrismaService } from '../common/prisma/prisma.service';
 import { CreateUserDtos } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
