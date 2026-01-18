@@ -46,5 +46,9 @@ COPY --from=builder /app/dist ./dist
 
 EXPOSE 3000
 
+# Create an entrypoint script
+COPY docker-entrypoint.sh /app/
+RUN chmod +x /app/docker-entrypoint.sh
+
 # 🔥 REAL DATABASE_URL comes from docker-compose at runtime
-CMD ["sh", "-c", "npx prisma migrate deploy && node dist/src/main.js"]
+ENTRYPOINT ["/app/docker-entrypoint.sh"]
