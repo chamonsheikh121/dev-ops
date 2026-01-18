@@ -58,18 +58,18 @@ services:
     networks:
       - socialapp-network
 
-  prometheus:
-    image: prom/prometheus
-    container_name: prometheus
-    restart: always
-    ports:
-      - "9090:9090"
-    volumes:
-      - ./prometheus.yml:/etc/prometheus/prometheus.yml
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
-    networks:
-      - socialapp-network
+  # prometheus:
+  #   image: prom/prometheus
+  #   container_name: prometheus
+  #   restart: always
+  #   ports:
+  #     - "9090:9090"
+  #   volumes:
+  #     - ./prometheus.yml:/etc/prometheus/prometheus.yml
+  #   extra_hosts:
+  #     - "host.docker.internal:host-gateway"
+  #   networks:
+  #     - socialapp-network
 
   grafana:
     image: grafana/grafana
@@ -97,17 +97,17 @@ services:
     networks:
       - socialapp-network
 
-  promtail:
-    image: grafana/promtail:latest
-    container_name: promtail
-    restart: always
-    volumes:
-      - ./promtail-config.yml:/etc/promtail/config.yml
-      - /var/lib/docker/containers:/var/lib/docker/containers:ro
-      - /var/run/docker.sock:/var/run/docker.sock
-    command: -config.file=/etc/promtail/config.yml
-    networks:
-      - socialapp-network
+  # promtail:
+  #   image: grafana/promtail:latest
+  #   container_name: promtail
+  #   restart: always
+  #   volumes:
+  #     - ./promtail-config.yml:/etc/promtail/config.yml
+  #     - /var/lib/docker/containers:/var/lib/docker/containers:ro
+  #     - /var/run/docker.sock:/var/run/docker.sock
+  #   command: -config.file=/etc/promtail/config.yml
+  #   networks:
+  #     - socialapp-network
 
 volumes:
   postgres_data:
