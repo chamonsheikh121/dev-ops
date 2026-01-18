@@ -1,54 +1,50 @@
+# ======================
 # Build stage
+# ======================
 FROM node:20-alpine AS builder
 
-# Install pnpm
 RUN npm install -g pnpm
 
 WORKDIR /app
 
-# Copy package files
+# 🔥 DUMMY DATABASE_URL (BUILD TIME ONLY)
+ENV DATABASE_URL="postgresql://dummy:dummy@localhost:5432/dummy"
+
 COPY package.json pnpm-lock.yaml ./
 COPY prisma.config.ts ./
 
-# Install dependencies
-RUN pnpm install 
+RUN pnpm install
 
-# Copy prisma schema and config
 COPY prisma ./prisma
+RUN pnpx prisma generate   # ✅ now works
 
-# Generate Prisma Client (set dummy DATABASE_URL for config loading)
-RUN DATABASE_URL="postgresql://dummy:dummy@localhost:5432/dummy" pnpx prisma generate
-
-# Copy source code
 COPY . .
-
-# Build application
 RUN pnpm run build
 
+
+# ======================
 # Production stage
+# ======================
 FROM node:20-alpine AS production
 
-# Install pnpm
 RUN npm install -g pnpm
 
 WORKDIR /app
 
-# Copy package files
+# 🔥 SAME DUMMY HERE
+ENV DATABASE_URL="postgresql://dummy:dummy@localhost:5432/dummy"
+
 COPY package.json pnpm-lock.yaml ./
 COPY prisma.config.ts ./
 
-# Install production dependencies only
-RUN pnpm install --prod 
+RUN pnpm install --prod
 
-# Copy prisma schema and generate client
 COPY prisma ./prisma
-RUN DATABASE_URL="postgresql://dummy:dummy@localhost:5432/dummy" pnpx prisma generate
+RUN pnpx prisma generate   # ✅ works
 
-# Copy built application from builder
 COPY --from=builder /app/dist ./dist
 
-# Expose application port
-EXPOSE 5000
+EXPOSE 3000
 
-# Start application
-CMD ["node", "dist/src/main.js"]
+# 🔥 REAL DATABASE_URL comes from docker-compose at runtime
+CMD ["sh", "-c", "npx prisma migrate deploy && node dist/src/main.js"]
