@@ -157,7 +157,6 @@ jobs:
             docker compose --profile prod pull
             docker compose --profile prod down
             docker compose --profile prod up -d
-            docker system prune -f
 
       - name: Telegram notify on deploy success
         if: success()
