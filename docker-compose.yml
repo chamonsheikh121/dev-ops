@@ -3,10 +3,9 @@ services:
   app:
     image: chamonali121/socialapp:latest
     container_name: social_app
-    # build:
-    #   context: .
-    #   dockerfile: Dockerfile
     restart: always
+    profiles:
+      - prod
     env_file:
       - .env
     environment:
@@ -21,21 +20,23 @@ services:
         condition: service_healthy
     networks:
       - socialapp-network
-    
+
   postgres:
     image: postgres:15
     container_name: postgres_db
     restart: always
+    profiles:
+      - prod
     environment:
-      - POSTGRES_USER=${POSTGRES_USER}
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
-      - POSTGRES_DB=${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
     ports:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -46,6 +47,8 @@ services:
     image: redis:alpine
     container_name: redis_cache
     restart: always
+    profiles:
+      - prod
     ports:
       - "6379:6379"
     volumes:
@@ -58,27 +61,16 @@ services:
     networks:
       - socialapp-network
 
-  # prometheus:
-  #   image: prom/prometheus
-  #   container_name: prometheus
-  #   restart: always
-  #   ports:
-  #     - "9090:9090"
-  #   volumes:
-  #     - ./prometheus.yml:/etc/prometheus/prometheus.yml
-  #   extra_hosts:
-  #     - "host.docker.internal:host-gateway"
-  #   networks:
-  #     - socialapp-network
-
   grafana:
     image: grafana/grafana
     container_name: grafana
     restart: always
+    profiles:
+      - prod
     ports:
       - "3001:3000"
     environment:
-      - GF_SECURITY_ADMIN_PASSWORD=admin
+      GF_SECURITY_ADMIN_PASSWORD: admin
     volumes:
       - grafana_data:/var/lib/grafana
       - ./grafana/provisioning:/etc/grafana/provisioning
@@ -89,6 +81,8 @@ services:
     image: grafana/loki:latest
     container_name: loki
     restart: always
+    profiles:
+      - prod
     ports:
       - "3100:3100"
     volumes:
@@ -96,18 +90,6 @@ services:
     command: -config.file=/etc/loki/local-config.yaml
     networks:
       - socialapp-network
-
-  # promtail:
-  #   image: grafana/promtail:latest
-  #   container_name: promtail
-  #   restart: always
-  #   volumes:
-  #     - ./promtail-config.yml:/etc/promtail/config.yml
-  #     - /var/lib/docker/containers:/var/lib/docker/containers:ro
-  #     - /var/run/docker.sock:/var/run/docker.sock
-  #   command: -config.file=/etc/promtail/config.yml
-  #   networks:
-  #     - socialapp-network
 
 volumes:
   postgres_data:
